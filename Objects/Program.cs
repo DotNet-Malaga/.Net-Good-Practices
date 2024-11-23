@@ -1,44 +1,78 @@
 ﻿
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
-using Bogus;
-using Objects.Models;
 
 
-BenchmarkSwitcher.FromAssembly(typeof(TestObjects).Assembly).Run(args);
+BenchmarkSwitcher.FromAssembly(typeof(Lookups).Assembly).Run(args);
 
 [ShortRunJob]
 [MemoryDiagnoser]
-public class TestObjects
+public class Lookups
 {
-    [Benchmark]
-    public void ObjectTest()
-    {
-        var faker = new Faker();
+    public List<Person> Persons { get; set; }
+    public Dictionary<string, Person> PersonsDict { get; set; }
+    public HashSet<string> PersonsHashSet { get; set; }
 
-        for (int i = 0; i < 40_000; i++)
+    [GlobalSetup]
+    public void Setup()
+    {
+        Persons = new List<Person>();
+        PersonsDict = new Dictionary<string, Person>();
+        PersonsHashSet = new HashSet<string>();
+        for (int i = 0; i < 10_000; i++)
         {
-            var obj = new User
+            var person = new Person
             {
-                Name = faker.Name.FullName(),
-                Teams = faker.PickRandom("Technology", "Business", "Science", "Education", "Art"),
-                Position = faker.PickRandom("Manager", "Developer", "Designer", "Analyst", "Administrator")
+                Name = "Name" + i,
+                Surname = "Surname" + i
             };
+            Persons.Add(person);
+            PersonsDict.Add(person.Name, person);
+            PersonsHashSet.Add(person.Name);
         }
     }
 
 
     [Benchmark]
-    public void ObjectTestOptimizado()
+    public int ObjectFinderList()
     {
-        var faker = new Faker();
-
-        var obj = new User();
-        for (int i = 0; i < 40_000; i++)
+        int found = 0;
+        var rnd = new Random();
+        for (int i = 0; i < 10_000; i++)
         {
-            obj.Name = faker.Name.FullName();
-            obj.Teams = faker.PickRandom("Technology", "Business", "Science", "Education", "Art");
-            obj.Position = faker.PickRandom("Manager", "Developer", "Designer", "Analyst", "Administrator");
+            found += Persons.FirstOrDefault(p => p.Name == $"Name{rnd.Next(1, 100_000)}") != null ? 1 : 0;
         }
+        return found;
     }
+
+    [Benchmark]
+    public int ObjectFinderDict()
+    {
+        int found = 0;
+        var rnd = new Random();
+        for (int i = 0; i < 10_000; i++)
+        {
+            found += PersonsDict.ContainsKey($"Name{rnd.Next(1, 100_000)}") ? 1 : 0;
+        }
+        return found;
+    }
+
+    [Benchmark]
+    public int ObjectFinderHashSet()
+    {
+        int found = 0;
+        var rnd = new Random();
+        for (int i = 0; i < 10_000; i++)
+        {
+            found += PersonsHashSet.Contains($"Name{rnd.Next(1, 100_000)}") ? 1 : 0;
+        }
+        return found;
+    }
+}
+
+
+public class Person
+{
+    public string Name { get; set; }
+    public string Surname { get; set; }
 }

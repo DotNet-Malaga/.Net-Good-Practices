@@ -14,8 +14,8 @@ class ToSentenceCase : ICulturedStringTransformer
             {
                 return input;
             }
-
-            return StringHumanizeExtensions.Concat(culture.TextInfo.ToUpper(input[0]), input.AsSpan(1));
+            var c = culture.TextInfo.ToUpper(input[0]);
+            return StringHumanizeExtensions.Concat(new CharSpan(in c) , input.AsSpan(1));
         }
 
         return culture.TextInfo.ToUpper(input);

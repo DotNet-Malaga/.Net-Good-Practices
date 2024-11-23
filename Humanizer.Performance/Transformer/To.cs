@@ -8,11 +8,20 @@ public static class To
     public static string Transform(this string input, params IStringTransformer[] transformers) =>
         transformers.Aggregate(input, (current, stringTransformer) => stringTransformer.Transform(current));
 
+    public static string Transform(this string input, params ReadOnlySpan<IStringTransformer> transformers)
+    {
+        foreach (var transformer in transformers)
+        {
+            input = transformer.Transform(input);
+        }
+        return input;
+    }
+
     /// <summary>
     /// Transforms a string using the provided transformers. Transformations are applied in the provided order.
     /// </summary>
     public static string Transform(this string input, CultureInfo culture, params ICulturedStringTransformer[] transformers) =>
-        transformers.Aggregate(input, (current, stringTransformer) => stringTransformer.Transform(current, culture));
+    transformers.Aggregate(input, (current, stringTransformer) => stringTransformer.Transform(current, culture));
 
     /// <summary>
     /// Changes string to title case

@@ -7,73 +7,61 @@ using DataBases.Context;
 using Microsoft.EntityFrameworkCore;
 
 
-[ShortRunJob]
+
 [MemoryDiagnoser]
 public class DatabaseBenchmark
 {
-    private AppDbContext _context;
-
-    public DatabaseBenchmark()
-    {
-        _context = new AppDbContext();
-    }
 
     [Benchmark]
-    public async Task MeasureCustomerQueryNOPerformance1()
+    public decimal LoadCustomersCalculateAverageSalary()
     {
-        var customers = await _context.Customer.AsNoTracking()
-            .Take(100).ToListAsync();
-        var orders = new List<Order>();
+        using var ctx = new AppDbContext();
 
-        if (customers.Any())
+        decimal sum = 0;
+        var count = 0;
+        foreach (var blog in ctx.Customer)
         {
-            foreach (var customer in customers)
-            {
-                orders.AddRange(await _context.Order.Where(c => c.CustomerId == customer.Id).ToListAsync());
-            }
+            sum += blog.Salary;
+            count++;
         }
+
+        return sum / count;
     }
-
     [Benchmark]
-    public async Task MeasureCustomerQueryNOPerformance2()
+    public decimal LoadCustomersNoTrackingCalculateAverageSalary()
     {
-        var customers = (await _context.Customer
-                                          .AsNoTracking()
-                                          .Include(c => c.Orders)
-                                          .ToListAsync());
+        using var ctx = new AppDbContext();
+
+        decimal sum = 0;
+        var count = 0;
+        foreach (var blog in ctx.Customer.AsNoTracking())
+        {
+            sum += blog.Salary;
+            count++;
+        }
+
+        return sum / count;
     }
-
     [Benchmark]
-    public async Task MeasureCustomerQueryNOPerformance3()
+    public decimal LoadCustomersProjectOnlyCalculateAverageSalary()
     {
-        //for (var i = 0; i < 10_000; i++)
-        //{
+        using var ctx = new AppDbContext();
 
-            var customers = (await _context.Customer
-                                              .AsNoTracking()
-                                              .Include(c => c.Orders)
-                                              .ToListAsync()).OrderBy(c => c.Salary);
-        //}
+        decimal sum = 0;
+        var count = 0;
+        foreach (var salary in ctx.Customer.Select(c => c.Salary))
+        {
+            sum += salary;
+            count++;
+        }
+
+        return sum / count;
     }
-
-
-    [Benchmark]
-    public async Task MeasureCustomerQueryNOPerformance4()
+    [Benchmark(Baseline = true)]
+    public decimal CalculateInDatabase()
     {
-        var customers = (await _context.Customer
-                                           .AsNoTracking()
-                                          .Include(c => c.Orders)
-                                          .OrderBy(c => c.Salary)
-                                          .ToListAsync());
-    }
-
-    [Benchmark]
-    public async Task MeasureCustomerQueryPerformance()
-    {
-        var customers = (await _context.Customer
-                                       .AsNoTracking()
-                                       .Include(c => c.Orders)
-                                       .ToListAsync());
+        using var ctx = new AppDbContext();
+        return ctx.Customer.Average(b => b.Salary);
     }
 
     public static void Main(string[] args)
