@@ -19,8 +19,7 @@ public class Tests
 {
     [Benchmark]
     public string Test() =>
-    Truncator.FixedLength.Truncate(
-        "Hllo, build! How are you?", 8, "...");
+    Truncator.FixedLength.Truncate("Hello, build! How are you?", 8, "...");
 
 
     [Benchmark]

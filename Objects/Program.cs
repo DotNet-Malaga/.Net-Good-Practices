@@ -40,7 +40,7 @@ public class Lookups
         var rnd = new Random();
         for (int i = 0; i < 10_000; i++)
         {
-            found += Persons.FirstOrDefault(p => p.Name == $"Name{rnd.Next(1, 100_000)}") != null ? 1 : 0;
+            found += Persons.Find(p => p.Name == $"Name{rnd.Next(1, 100_000)}") != null ? 1 : 0;
         }
         return found;
     }

@@ -11,24 +11,52 @@ BenchmarkSwitcher.FromAssembly(typeof(StringConcat).Assembly).Run(args);
 public class StringConcat
 {
     [Benchmark]
-    public void Test()
+    public string Test()
     {
         string result = "";
         for (int i = 0; i < 10_000; i++)
         {
             result += i.ToString();
         }
+        return result;
     }
 
 
     [Benchmark]
-    public void TestOptimizado()
+    public string TestOptimizado()
     {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 10_000; i++)
         {
             sb.Append(i.ToString());
         }
+
+        return sb.ToString();
+    }
+
+
+    [Benchmark]
+    public string ShortTest()
+    {
+        string result = "";
+        for (int i = 0; i < 10; i++)
+        {
+            result += i.ToString();
+        }
+        return result;
+    }
+
+
+    [Benchmark]
+    public string ShortTestOptimizado()
+    {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 10; i++)
+        {
+            sb.Append(i.ToString());
+        }
+
+        return sb.ToString();
     }
 }
 
@@ -37,28 +65,7 @@ public class StringConcat
 [MemoryDiagnoser]
 public class StringAllocationTests
 {
-    //[Benchmark]
-    //public void BoxingTest()
-    //{
-    //    Random rand = new Random();
-    //    for (int i = 0; i < 90_000; i++)
-    //    {
-    //        object boxed = rand.Next(i, 100_000_000) * i;
-    //    }
-    //}
-
-
-
-    //[Benchmark]
-    //public void BoxingTestOK()
-    //{
-    //    Random rand = new Random();
-    //    for (int i = 0; i < 90_000; i++)
-    //    {
-    //        int unboxed = rand.Next(i, 100_000_000) * i;
-    //    }
-    //}
-
+   
 
 
     [Benchmark]

@@ -7,7 +7,7 @@ using Humanizer;
 //Tests t = new();
 //for (int i = 0; i < 10_000; i++)
 //{
-//    t.Test2();
+//    t.Test();
 //}
 
 
